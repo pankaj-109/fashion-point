@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Fashion Point - Luxury Studio | Kala Amb</title>
+  
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              black: '#0a0a0a',
+              cardDark: '#141414',
+              borderDark: '#262626'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+
+  <style>
+    #splash-screen { transition: opacity 0.4s ease, visibility 0.4s; }
+    .btn-bounce { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+    .btn-bounce:hover { transform: translateY(-2px); }
+    .btn-bounce:active { transform: scale(0.96); }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="bg-[#fafafa] dark:bg-brand-black text-neutral-900 dark:text-neutral-100 transition-colors duration-300 min-h-screen flex flex-col justify-between">
+
+  <!-- Splash Screen -->
+  <div id="splash-screen" class="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center">
+    <div class="flex flex-col items-center">
+      <div class="w-20 h-20 rounded-3xl border-2 border-white/80 flex items-center justify-center bg-neutral-900 shadow-2xl">
+        <span class="text-3xl font-serif font-black tracking-tighter text-white select-none">F<span class="text-neutral-400 -ml-1">P</span></span>
+      </div>
+      <h1 class="text-white text-xs uppercase tracking-[0.3em] font-light mt-3">Fashion Point</h1>
+      <p class="text-neutral-500 text-[9px] uppercase tracking-widest mt-1">Kala Amb, Himachal Pradesh</p>
+    </div>
+  </div>
+
+  <!-- Navbar -->
+  <header class="sticky top-0 z-40 bg-white/90 dark:bg-[#121212]/90 backdrop-blur-md border-b border-neutral-200 dark:border-neutral-800">
+    <div class="max-w-7xl mx-auto px-4 py-3.5 flex items-center justify-between">
+      <div class="flex items-center gap-3 cursor-pointer" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+        <div class="w-10 h-10 rounded-xl border border-neutral-300 dark:border-neutral-700 flex items-center justify-center font-serif font-black text-base select-none">
+          F<span class="text-neutral-400 -ml-0.5">P</span>
+        </div>
+        <div>
+          <h1 class="text-xl font-black tracking-widest uppercase font-serif leading-none">Fashion Point</h1>
+          <p class="text-[9px] uppercase tracking-widest text-neutral-500 font-semibold mt-0.5">Kala Amb, Himachal Pradesh</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <!-- Direct Shop Helpline -->
+        <a href="https://wa.me/918091810807?text=Hello%20Fashion%20Point%2C%20I%20have%20an%20inquiry%20regarding%20your%20products." target="_blank" class="hidden sm:flex items-center gap-1.5 text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-3 py-1.5 rounded-full border border-emerald-200 dark:border-emerald-800/50">
+          <i class="fa-brands fa-whatsapp text-sm"></i> WhatsApp Support
+        </a>
+
+        <!-- Theme Switcher -->
+        <button onclick="toggleTheme()" class="p-2.5 rounded-full border border-neutral-300 dark:border-neutral-700 btn-bounce" title="Toggle Light/Dark Mode">
+          <i class="fa-solid fa-moon dark:hidden text-sm"></i>
+          <i class="fa-solid fa-sun hidden dark:block text-sm text-yellow-400"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Category Filter Bar -->
+    <div class="border-t border-neutral-200 dark:border-neutral-800 px-4 py-2.5 overflow-x-auto no-scrollbar">
+      <div class="max-w-7xl mx-auto flex gap-2">
+        <button onclick="filterItems('all', event)" class="filter-btn active px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 btn-bounce">All Collections</button>
+        <button onclick="filterItems('Saree', event)" class="filter-btn px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-neutral-200/80 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 btn-bounce">Sarees</button>
+        <button onclick="filterItems('Suit', event)" class="filter-btn px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-neutral-200/80 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 btn-bounce">Suits & Kurtis</button>
+        <button onclick="filterItems('Men', event)" class="filter-btn px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-neutral-200/80 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 btn-bounce">Men & Blazers</button>
+        <button onclick="filterItems('Kids', event)" class="filter-btn px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-neutral-200/80 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 btn-bounce">Kids Wear</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Product Catalog Grid -->
+  <main class="max-w-7xl mx-auto px-4 py-8 flex-grow w-full">
+    <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
+  </main>
+
+  <!-- Media Preview Modal -->
+  <div id="media-modal" class="fixed inset-0 bg-black/90 z-50 hidden flex items-center justify-center p-4" onclick="closeMediaModal(event)">
+    <div class="relative max-w-xl w-full bg-neutral-900 border border-neutral-800 rounded-3xl p-5 overflow-hidden" onclick="event.stopPropagation()">
+      <button onclick="closeMediaModal()" class="absolute top-4 right-4 text-neutral-400 hover:text-white text-xl z-10">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+      <div id="modal-content" class="w-full flex justify-center items-center min-h-[300px] max-h-[70vh]"></div>
+    </div>
+  </div>
+
+  <!-- Store Location Footer -->
+  <footer class="border-t border-neutral-200 dark:border-neutral-800 bg-white dark:bg-[#121212] pt-12 pb-8 mt-12 transition-colors">
+    <div class="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left items-start">
+      
+      <!-- Brand Details -->
+      <div>
+        <div class="flex items-center justify-center md:justify-start gap-2.5 mb-2">
+          <div class="w-8 h-8 rounded-lg border border-neutral-300 dark:border-neutral-700 flex items-center justify-center font-serif font-black text-sm select-none">
+            F<span class="text-neutral-400">P</span>
+          </div>
+          <h3 class="text-base font-black uppercase tracking-widest font-serif">Fashion Point</h3>
+        </div>
+        <p class="text-xs text-neutral-500 leading-relaxed max-w-xs mx-auto md:mx-0">
+          Exclusive ethnic wear, designer sarees, wedding blazers, suits, and children's festive collections.
+        </p>
+      </div>
+
+      <!-- Verified Google Maps Location Block -->
+      <div class="space-y-2">
+        <h4 class="text-xs font-black uppercase tracking-widest text-neutral-900 dark:text-neutral-100 flex items-center justify-center md:justify-start gap-1.5">
+          <i class="fa-solid fa-location-dot text-rose-500"></i> Store Location
+        </h4>
+        <p class="text-xs font-semibold uppercase tracking-wider text-neutral-600 dark:text-neutral-300 leading-snug">
+          FASHION POINT<br />
+          TRILOKPUR ROAD, KALA AMB<br />
+          HIMACHAL PRADESH 173030
+        </p>
+
+        <!-- Live Embedded Map -->
+        <div class="w-full h-36 rounded-xl overflow-hidden border border-neutral-300 dark:border-neutral-700 mt-2 shadow-sm">
+          <iframe 
+            width="100%" 
+            height="100%" 
+            style="border:0;" 
+            loading="lazy" 
+            allowfullscreen 
+            referrerpolicy="no-referrer-when-downgrade" 
+            src="https://maps.google.com/maps?q=30.4992091,77.2070025&hl=en&z=17&output=embed">
+          </iframe>
+        </div>
+
+        <a href="https://www.google.com/maps/place/Fashion+point/@30.4992091,77.2070025,17z/data=!4m14!1m7!3m6!1s0x390f09a7c9f1f2cb:0xcab9453116db3e92!2sFashion+point!8m2!3d30.4992091!4d77.2070025!16s%2Fg%2F11h5sqbg26!3m5!1s0x390f09a7c9f1f2cb:0xcab9453116db3e92!8m2!3d30.4992091!4d77.2070025!16s%2Fg%2F11h5sqbg26" target="_blank" class="inline-block text-[11px] font-bold text-neutral-500 hover:text-black dark:hover:text-white underline tracking-wider mt-1">
+          Open in Google Maps App &rarr;
+        </a>
+      </div>
+
+      <!-- Direct Contact & Orders -->
+      <div class="space-y-2">
+        <h4 class="text-xs font-black uppercase tracking-widest text-neutral-900 dark:text-neutral-100 flex items-center justify-center md:justify-start gap-1.5">
+          <i class="fa-brands fa-whatsapp text-emerald-500 text-sm"></i> Direct Order Desk
+        </h4>
+        <p class="text-xs text-neutral-500">
+          WhatsApp / Calling: <span class="font-bold text-neutral-800 dark:text-neutral-200">+91 8091810807</span>
+        </p>
+        <p class="text-[11px] text-neutral-400">Select your size & quantity above to place an order directly on WhatsApp with instant delivery confirmation.</p>
+      </div>
+    </div>
+
+    <div class="border-t border-neutral-100 dark:border-neutral-800/60 max-w-7xl mx-auto px-4 mt-8 pt-6 text-center text-[10px] text-neutral-500 uppercase tracking-widest">
+      &copy; 2026 Fashion Point • Kala Amb • All Rights Reserved
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      initTheme();
+      renderProducts();
+      setTimeout(() => {
+        const splash = document.getElementById("splash-screen");
+        if (splash) {
+          splash.style.opacity = "0";
+          setTimeout(() => splash.style.display = "none", 400);
+        }
+      }, 800);
+    });
+  </script>
+</body>
+</html>

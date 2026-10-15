@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Portal - Fashion Point</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              black: '#0a0a0a',
+              cardDark: '#141414',
+              borderDark: '#262626'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <style>
+    .btn-bounce { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+    .btn-bounce:hover { transform: translateY(-2px); }
+    .btn-bounce:active { transform: scale(0.96); }
+  </style>
+</head>
+<body class="bg-[#fafafa] dark:bg-brand-black text-neutral-900 dark:text-neutral-100 min-h-screen transition-colors">
+
+  <!-- Admin Topbar -->
+  <header class="sticky top-0 z-40 bg-white/90 dark:bg-[#121212]/90 backdrop-blur-md border-b border-neutral-200 dark:border-neutral-800">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl border border-neutral-300 dark:border-neutral-700 flex items-center justify-center font-serif font-black text-sm">
+          F<span class="text-neutral-400 -ml-0.5">P</span>
+        </div>
+        <div>
+          <h1 class="text-base font-black tracking-wider uppercase font-serif">Store Management</h1>
+          <p class="text-[9px] uppercase tracking-widest text-neutral-500 font-semibold">Fashion Point • Kala Amb</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <a href="index.html" class="px-3.5 py-1.5 rounded-xl border border-neutral-300 dark:border-neutral-700 text-xs font-bold hover:bg-neutral-100 dark:hover:bg-neutral-800 transition flex items-center gap-1.5">
+          <i class="fa-solid fa-arrow-left"></i> View Store
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Management Container -->
+  <main class="max-w-6xl mx-auto px-4 py-8 space-y-8">
+    
+    <!-- Add / Edit Item Form -->
+    <div class="bg-white dark:bg-brand-cardDark p-6 rounded-3xl border border-neutral-200 dark:border-brand-borderDark shadow-sm">
+      <div class="flex items-center justify-between mb-4 pb-2 border-b border-neutral-200 dark:border-neutral-800">
+        <h2 id="form-heading" class="text-base font-black uppercase tracking-wider flex items-center gap-2">
+          <i class="fa-solid fa-shirt"></i> Add New Product
+        </h2>
+        <button id="cancel-edit-btn" onclick="cancelEdit()" class="hidden text-xs text-rose-500 hover:underline font-bold">
+          Cancel Editing
+        </button>
+      </div>
+
+      <form id="product-form" onsubmit="handleProductForm(event)" class="space-y-4">
+        <input type="hidden" id="edit-product-id" value="" />
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="text-[10px] font-black uppercase tracking-wider block mb-1">Product Title</label>
+            <input type="text" id="title" required placeholder="e.g. Pure Silk Banarasi Saree" class="w-full text-xs p-3 rounded-xl border border-neutral-300 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-900 text-neutral-900 dark:text-white outline-none" />
+          </div>
+
+          <div>
+            <label class="text-[10px] font-black uppercase tracking-wider block mb-1">Category</label>
+            <select id="category" required class="w-full text-xs p-3 rounded-xl border border-neutral-300 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-900 text-neutral-900 dark:text-white outline-none">
+              <option value="Saree">Saree</option>
+              <option value="Suit">Suit & Kurti</option>
+              <option value="Men">Men & Blazer</option>
+              <option value="Kids">Kids Wear</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label class="text-[10px] font-black uppercase tracking-wider block mb-1">Price (₹)</label>
+            <input type="number" id="price" required placeholder="e.g. 2499" class="w-full text-xs p-3 rounded-xl border border-neutral-300 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-900 text-neutral-900 dark:text-white outline-none" />
+          </div>
+
+          <div>
+            <label class="text-[10px] font-black uppercase tracking-wider block mb-1">Sizes (Comma separated)</label>
+            <input type="text" id="sizes" required placeholder="e.g. Free Size OR 38, 40, 42" class="w-full text-xs p-3 rounded-xl border border-neutral-300 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-900 text-neutral-900 dark:text-white outline-none" />
+          </div>
+
+          <div>
+            <label class="text-[10px] font-black uppercase tracking-wider block mb-1">Colors (Comma separated)</label>
+            <input type="text" id="colors" placeholder="e.g. Black, Gold, Off-White" class="w-full text-xs p-3 rounded-xl border border-neutral-300 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-900 text-neutral-900 dark:text-white outline-none" />
+          </div>
+        </div>
+
+        <div>
+          <label class="text-[10px] font-black uppercase tracking-wider block mb-1">Upload Product Photos / Videos</label>
+          <input type="file" id="media-files" accept="image/*,video/*" multiple class="w-full text-xs p-2 rounded-xl border border-neutral-300 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-900 text-neutral-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-neutral-200 dark:file:bg-neutral-800 dark:file:text-white" />
+          <p class="text-[10px] text-neutral-400 mt-1">Leave empty to keep existing images when editing.</p>
+        </div>
+
+        <button type="submit" id="submit-btn" class="w-full bg-neutral-900 hover:bg-black dark:bg-white dark:hover:bg-neutral-200 text-white dark:text-neutral-900 font-black uppercase tracking-wider py-3.5 rounded-xl btn-bounce shadow-md">
+          Publish Outfit
+        </button>
+      </form>
+    </div>
+
+    <!-- Live Inventory Management List -->
+    <div class="bg-white dark:bg-brand-cardDark p-6 rounded-3xl border border-neutral-200 dark:border-brand-borderDark shadow-sm">
+      <div class="flex items-center justify-between mb-4 pb-2 border-b border-neutral-200 dark:border-neutral-800">
+        <h2 class="text-base font-black uppercase tracking-wider flex items-center gap-2">
+          <i class="fa-solid fa-boxes-stacked"></i> Current Catalog Inventory
+        </h2>
+        <span class="text-[11px] text-neutral-400">Mark sold-out or edit anytime</span>
+      </div>
+
+      <div id="admin-inventory-list" class="space-y-3"></div>
+    </div>
+  </main>
+
+  <script src="app.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      initTheme();
+      renderAdminInventory();
+    });
+
+    async function handleProductForm(e) {
+      e.preventDefault();
+      const submitBtn = document.getElementById("submit-btn");
+      submitBtn.innerText = "Saving to catalog...";
+      submitBtn.disabled = true;
+
+      try {
+        const editId = document.getElementById("edit-product-id").value;
+        const title = document.getElementById("title").value.trim();
+        const category = document.getElementById("category").value;
+        const price = Number(document.getElementById("price").value);
+        const sizes = document.getElementById("sizes").value.split(",").map(s => s.trim());
+        const colors = document.getElementById("colors").value.trim() ? document.getElementById("colors").value.split(",").map(c => c.trim()) : [];
+        const mediaFilesInput = document.getElementById("media-files");
+
+        let uploadedMedia = [];
+        if (mediaFilesInput.files && mediaFilesInput.files.length > 0) {
+          for (let i = 0; i < mediaFilesInput.files.length; i++) {
+            const file = mediaFilesInput.files[i];
+            const isVideo = file.type.startsWith("video/");
+            const base64Data = await convertBase64(file);
+            uploadedMedia.push({
+              type: isVideo ? "video" : "image",
+              url: base64Data
+            });
+          }
+        }
+
+        let products = getProducts();
+
+        if (editId) {
+          const index = products.findIndex(p => p.id === Number(editId));
+          if (index !== -1) {
+            products[index].title = title;
+            products[index].category = category;
+            products[index].price = price;
+            products[index].sizes = sizes;
+            products[index].colors = colors;
+            if (uploadedMedia.length > 0) {
+              products[index].media = uploadedMedia;
+            }
+          }
+          alert("Product updated successfully!");
+          cancelEdit();
+        } else {
+          if (uploadedMedia.length === 0) {
+            uploadedMedia.push({
+              type: "image",
+              url: "https://placehold.co/600x800/171717/ffffff?text=Fashion+Point"
+            });
+          }
+
+          const newProduct = {
+            id: Date.now(),
+            title,
+            category,
+            price,
+            sizes,
+            colors,
+            inStock: true,
+            media: uploadedMedia
+          };
+
+          products.unshift(newProduct);
+          alert("New product published!");
+          document.getElementById("product-form").reset();
+        }
+
+        saveProducts(products);
+        renderAdminInventory();
+      } catch (err) {
+        console.error(err);
+        alert("Upload error. Please use compressed photos.");
+      } finally {
+        submitBtn.innerText = editId ? "Save Changes" : "Publish Outfit";
+        submitBtn.disabled = false;
+      }
+    }
+
+    function convertBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+      });
+    }
+
+    function renderAdminInventory() {
+      const container = document.getElementById("admin-inventory-list");
+      if (!container) return;
+
+      const products = getProducts();
+      if (products.length === 0) {
+        container.innerHTML = `<p class="text-xs text-neutral-500 py-6 text-center">No products found in inventory.</p>`;
+        return;
+      }
+
+      container.innerHTML = products.map(item => {
+        const isAvailable = item.inStock !== false;
+        const thumb = (item.media && item.media[0])
+          ? (item.media[0].type === "video" ? "https://placehold.co/100x100/000/fff?text=VIDEO" : item.media[0].url)
+          : "https://placehold.co/100x100";
+
+        return `
+          <div class="bg-neutral-50 dark:bg-neutral-900 p-4 rounded-2xl border border-neutral-200 dark:border-neutral-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+              <img src="${thumb}" class="w-14 h-14 object-cover rounded-xl border border-neutral-300 dark:border-neutral-700"/>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h4 class="font-bold text-sm text-neutral-900 dark:text-white">${item.title}</h4>
+                  <span class="text-[9px] px-2 py-0.5 rounded font-black uppercase ${isAvailable ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}">
+                    ${isAvailable ? 'In Stock' : 'Sold Out'}
+                  </span>
+                </div>
+                <p class="text-xs text-neutral-500 mt-0.5">₹${item.price} • ${item.category} • Sizes: [${item.sizes.join(", ")}]</p>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2 self-end md:self-center">
+              <button onclick="toggleStock(${item.id})" class="px-3 py-1.5 rounded-lg border border-neutral-300 dark:border-neutral-700 text-xs font-semibold ${isAvailable ? 'hover:bg-amber-500 hover:text-white' : 'hover:bg-emerald-600 hover:text-white'} transition">
+                ${isAvailable ? 'Mark Sold Out' : 'Mark In Stock'}
+              </button>
+              <button onclick="startEditProduct(${item.id})" class="px-3 py-1.5 rounded-lg bg-neutral-200 dark:bg-neutral-800 text-neutral-900 dark:text-white text-xs font-bold hover:bg-neutral-300 dark:hover:bg-neutral-700 transition">
+                <i class="fa-solid fa-pen-to-square mr-1"></i> Edit
+              </button>
+              <button onclick="deleteProduct(${item.id})" class="text-rose-500 hover:text-rose-700 text-xs font-bold p-2">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function toggleStock(id) {
+      let products = getProducts();
+      const index = products.findIndex(p => p.id === id);
+      if (index !== -1) {
+        products[index].inStock = !products[index].inStock;
+        saveProducts(products);
+        renderAdminInventory();
+      }
+    }
+
+    function startEditProduct(id) {
+      const products = getProducts();
+      const item = products.find(p => p.id === id);
+      if (!item) return;
+
+      document.getElementById("edit-product-id").value = item.id;
+      document.getElementById("title").value = item.title;
+      document.getElementById("category").value = item.category;
+      document.getElementById("price").value = item.price;
+      document.getElementById("sizes").value = item.sizes.join(", ");
+      document.getElementById("colors").value = item.colors ? item.colors.join(", ") : "";
+      
+      document.getElementById("form-heading").innerHTML = `<i class="fa-solid fa-pen-to-square"></i> Editing: ${item.title}`;
+      document.getElementById("submit-btn").innerText = "Save Changes";
+      document.getElementById("cancel-edit-btn").classList.remove("hidden");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function cancelEdit() {
+      document.getElementById("product-form").reset();
+      document.getElementById("edit-product-id").value = "";
+      document.getElementById("form-heading").innerHTML = `<i class="fa-solid fa-shirt"></i> Add New Product`;
+      document.getElementById("submit-btn").innerText = "Publish Outfit";
+      document.getElementById("cancel-edit-btn").classList.add("hidden");
+    }
+
+    function deleteProduct(id) {
+      if (confirm("Are you sure you want to remove this item?")) {
+        let products = getProducts();
+        products = products.filter(p => p.id !== id);
+        saveProducts(products);
+        renderAdminInventory();
+      }
+    }
+  </script>
+</body>
+</html>
