@@ -41,7 +41,7 @@
         <div>
           <h1 class="text-base font-black tracking-wider uppercase font-serif">Cloud Store Manager</h1>
           <p class="text-[9px] uppercase tracking-widest text-emerald-500 font-semibold flex items-center gap-1">
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block animate-pulse"></span> Firebase Live Sync
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block animate-pulse"></span> Firebase Realtime Sync
           </p>
         </div>
       </div>
@@ -56,15 +56,20 @@
 
   <main class="max-w-6xl mx-auto px-4 py-8 space-y-8">
     
-    <!-- Add Item Form -->
+    <!-- Add / Edit Item Form -->
     <div class="bg-white dark:bg-brand-cardDark p-6 rounded-3xl border border-neutral-200 dark:border-brand-borderDark shadow-sm">
       <div class="flex items-center justify-between mb-4 pb-2 border-b border-neutral-200 dark:border-neutral-800">
         <h2 id="form-heading" class="text-base font-black uppercase tracking-wider flex items-center gap-2">
-          <i class="fa-solid fa-cloud-arrow-up text-emerald-500"></i> Add Product (Syncs to All Phones)
+          <i class="fa-solid fa-cloud-arrow-up text-emerald-500"></i> <span id="heading-text">Add New Product</span>
         </h2>
+        <button id="cancel-edit-btn" onclick="window.cancelEditProduct()" class="hidden text-xs text-rose-500 hover:underline font-bold">
+          <i class="fa-solid fa-xmark mr-1"></i> Cancel Edit
+        </button>
       </div>
 
       <form id="product-form" class="space-y-4">
+        <input type="hidden" id="edit-product-id" value="" />
+
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label class="text-[10px] font-black uppercase tracking-wider block mb-1">Product Title</label>
@@ -82,7 +87,7 @@
           </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label class="text-[10px] font-black uppercase tracking-wider block mb-1">Price (₹)</label>
             <input type="number" id="price" required placeholder="e.g. 2499" class="w-full text-xs p-3 rounded-xl border border-neutral-300 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-900 text-neutral-900 dark:text-white outline-none" />
@@ -90,14 +95,19 @@
 
           <div>
             <label class="text-[10px] font-black uppercase tracking-wider block mb-1">Sizes (Comma separated)</label>
-            <input type="text" id="sizes" required placeholder="e.g. Free Size OR M, L, XL" class="w-full text-xs p-3 rounded-xl border border-neutral-300 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-900 text-neutral-900 dark:text-white outline-none" />
+            <input type="text" id="sizes" required placeholder="e.g. Free Size OR 38, 40, 42" class="w-full text-xs p-3 rounded-xl border border-neutral-300 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-900 text-neutral-900 dark:text-white outline-none" />
+          </div>
+
+          <div>
+            <label class="text-[10px] font-black uppercase tracking-wider block mb-1">Colors (Comma separated)</label>
+            <input type="text" id="colors" placeholder="e.g. Black, Maroon, Navy Blue" class="w-full text-xs p-3 rounded-xl border border-neutral-300 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-900 text-neutral-900 dark:text-white outline-none" />
           </div>
         </div>
 
         <div>
-          <label class="text-[10px] font-black uppercase tracking-wider block mb-1">Product Photo</label>
-          <input type="file" id="media-file" accept="image/*" class="w-full text-xs p-2 rounded-xl border border-neutral-300 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-900 text-neutral-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-neutral-200 dark:file:bg-neutral-800 dark:file:text-white" />
-          <p class="text-[10px] text-neutral-400 mt-1">Photo will be auto-optimized for instant mobile loading.</p>
+          <label class="text-[10px] font-black uppercase tracking-wider block mb-1">Upload Multiple Photos & Short Videos</label>
+          <input type="file" id="media-files" accept="image/*,video/*" multiple class="w-full text-xs p-2 rounded-xl border border-neutral-300 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-900 text-neutral-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-neutral-200 dark:file:bg-neutral-800 dark:file:text-white" />
+          <p class="text-[10px] text-neutral-400 mt-1">Select multiple files together. While editing, leave empty to preserve existing photos.</p>
         </div>
 
         <button type="submit" id="submit-btn" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase tracking-wider py-3.5 rounded-xl btn-bounce shadow-md">
@@ -112,7 +122,7 @@
         <h2 class="text-base font-black uppercase tracking-wider flex items-center gap-2">
           <i class="fa-solid fa-boxes-stacked"></i> Live Cloud Inventory
         </h2>
-        <span class="text-[11px] text-neutral-400">Updates sync in real-time</span>
+        <span class="text-[11px] text-neutral-400">Live multi-device management</span>
       </div>
 
       <div id="admin-inventory-list" class="space-y-3">
@@ -140,22 +150,31 @@
 
     let adminProducts = [];
 
-    // Realtime Cloud Listener
+    // Realtime Listener
     try {
       const q = query(collection(db, "products"), orderBy("createdAt", "desc"));
       onSnapshot(q, (snapshot) => {
-        adminProducts = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        adminProducts = snapshot.docs.map(d => {
+          const data = d.data();
+          let mediaArr = data.media;
+          if (!mediaArr || mediaArr.length === 0) {
+            mediaArr = [{ type: "image", url: data.imageUrl || "https://placehold.co/600x800/171717/ffffff?text=Fashion+Point" }];
+          }
+          return { id: d.id, ...data, media: mediaArr };
+        });
         renderAdminInventory();
       });
     } catch(e) {
       console.error(e);
     }
 
-    // Submit Handler
+    // Submit Handler: Add + Edit Support
     document.getElementById("product-form").addEventListener("submit", async (e) => {
       e.preventDefault();
       const submitBtn = document.getElementById("submit-btn");
-      submitBtn.innerText = "Publishing to Cloud...";
+      const editId = document.getElementById("edit-product-id").value;
+
+      submitBtn.innerText = editId ? "Updating in Cloud..." : "Publishing to Cloud...";
       submitBtn.disabled = true;
 
       try {
@@ -163,36 +182,77 @@
         const category = document.getElementById("category").value;
         const price = Number(document.getElementById("price").value);
         const sizes = document.getElementById("sizes").value.split(",").map(s => s.trim());
-        const fileInput = document.getElementById("media-file");
+        const colors = document.getElementById("colors").value.trim() 
+          ? document.getElementById("colors").value.split(",").map(c => c.trim()) 
+          : [];
+        const fileInput = document.getElementById("media-files");
 
-        let imageUrl = "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=700";
-        if (fileInput.files.length > 0) {
-          imageUrl = await resizeAndConvertImage(fileInput.files[0]);
+        let uploadedMedia = [];
+        if (fileInput.files && fileInput.files.length > 0) {
+          for (let i = 0; i < fileInput.files.length; i++) {
+            const file = fileInput.files[i];
+            const isVideo = file.type.startsWith("video/");
+            if (isVideo) {
+              const videoData = await readFileAsDataURL(file);
+              uploadedMedia.push({ type: "video", url: videoData });
+            } else {
+              const imgData = await resizeAndCompressImage(file);
+              uploadedMedia.push({ type: "image", url: imgData });
+            }
+          }
         }
 
-        await addDoc(collection(db, "products"), {
-          title,
-          category,
-          price,
-          sizes,
-          imageUrl,
-          inStock: true,
-          createdAt: serverTimestamp()
-        });
+        if (editId) {
+          // Update existing document in Firestore
+          const updatePayload = {
+            title,
+            category,
+            price,
+            sizes,
+            colors
+          };
+          if (uploadedMedia.length > 0) {
+            updatePayload.media = uploadedMedia;
+            updatePayload.imageUrl = uploadedMedia[0].url;
+          }
+          await updateDoc(doc(db, "products", editId), updatePayload);
+          alert("Product successfully updated in Cloud!");
+          window.cancelEditProduct();
+        } else {
+          // Add brand new document
+          if (uploadedMedia.length === 0) {
+            uploadedMedia.push({
+              type: "image",
+              url: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=700"
+            });
+          }
 
-        alert("Item Published! Har phone par bina page refresh kiye ye item live ho gaya hai.");
-        document.getElementById("product-form").reset();
+          await addDoc(collection(db, "products"), {
+            title,
+            category,
+            price,
+            sizes,
+            colors,
+            media: uploadedMedia,
+            imageUrl: uploadedMedia[0].url,
+            inStock: true,
+            createdAt: serverTimestamp()
+          });
+
+          alert("Item globally published! Live on all devices instantly.");
+          document.getElementById("product-form").reset();
+        }
       } catch (err) {
         console.error(err);
         alert("Upload error: " + err.message);
       } finally {
-        submitBtn.innerText = "Publish to Live Catalog";
+        submitBtn.innerText = editId ? "Save Changes" : "Publish to Live Catalog";
         submitBtn.disabled = false;
       }
     });
 
-    // Image Compressor to keep it ultra lightweight
-    function resizeAndConvertImage(file) {
+    // Compression utilities
+    function resizeAndCompressImage(file) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.readAsDataURL(file);
@@ -201,7 +261,7 @@
           img.src = event.target.result;
           img.onload = () => {
             const canvas = document.createElement("canvas");
-            const MAX_WIDTH = 800;
+            const MAX_WIDTH = 900;
             const scaleSize = MAX_WIDTH / img.width;
             canvas.width = (img.width > MAX_WIDTH) ? MAX_WIDTH : img.width;
             canvas.height = (img.width > MAX_WIDTH) ? (img.height * scaleSize) : img.height;
@@ -214,6 +274,16 @@
       });
     }
 
+    function readFileAsDataURL(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = err => reject(err);
+      });
+    }
+
+    // Render Admin List with Edit Button
     function renderAdminInventory() {
       const container = document.getElementById("admin-inventory-list");
       if (!container) return;
@@ -225,15 +295,22 @@
 
       container.innerHTML = adminProducts.map(item => {
         const isAvailable = item.inStock !== false;
+        const thumb = (item.media && item.media[0])
+          ? (item.media[0].type === "video" ? "https://placehold.co/100x100/000/fff?text=VIDEO" : item.media[0].url)
+          : (item.imageUrl || "https://placehold.co/100x100");
+
         return `
           <div class="bg-neutral-50 dark:bg-neutral-900 p-4 rounded-2xl border border-neutral-200 dark:border-neutral-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div class="flex items-center gap-3">
-              <img src="${item.imageUrl}" class="w-14 h-14 object-cover rounded-xl border border-neutral-300 dark:border-neutral-700"/>
+              <img src="${thumb}" class="w-14 h-14 object-cover rounded-xl border border-neutral-300 dark:border-neutral-700"/>
               <div>
                 <div class="flex items-center gap-2">
                   <h4 class="font-bold text-sm text-neutral-900 dark:text-white">${item.title}</h4>
                   <span class="text-[9px] px-2 py-0.5 rounded font-black uppercase ${isAvailable ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}">
                     ${isAvailable ? 'In Stock' : 'Sold Out'}
+                  </span>
+                  <span class="text-[9px] text-neutral-400 font-semibold bg-neutral-200 dark:bg-neutral-800 px-1.5 py-0.5 rounded">
+                    ${item.media ? item.media.length : 1} media
                   </span>
                 </div>
                 <p class="text-xs text-neutral-500 mt-0.5">₹${item.price} • ${item.category} • Sizes: [${(item.sizes || []).join(", ")}]</p>
@@ -244,6 +321,9 @@
               <button onclick="window.toggleStockOnline('${item.id}', ${isAvailable})" class="px-3 py-1.5 rounded-lg border border-neutral-300 dark:border-neutral-700 text-xs font-semibold ${isAvailable ? 'hover:bg-amber-500 hover:text-white' : 'hover:bg-emerald-600 hover:text-white'} transition">
                 ${isAvailable ? 'Mark Sold Out' : 'Mark In Stock'}
               </button>
+              <button onclick="window.startEditProduct('${item.id}')" class="px-3 py-1.5 rounded-lg bg-neutral-200 dark:bg-neutral-800 text-neutral-900 dark:text-white text-xs font-bold hover:bg-neutral-300 dark:hover:bg-neutral-700 transition">
+                <i class="fa-solid fa-pen-to-square mr-1"></i> Edit
+              </button>
               <button onclick="window.deleteProductOnline('${item.id}')" class="text-rose-500 hover:text-rose-700 text-xs font-bold p-2">
                 <i class="fa-solid fa-trash"></i>
               </button>
@@ -252,6 +332,32 @@
         `;
       }).join("");
     }
+
+    // Edit Functionality
+    window.startEditProduct = (id) => {
+      const item = adminProducts.find(p => p.id === id);
+      if (!item) return;
+
+      document.getElementById("edit-product-id").value = item.id;
+      document.getElementById("title").value = item.title;
+      document.getElementById("category").value = item.category;
+      document.getElementById("price").value = item.price;
+      document.getElementById("sizes").value = (item.sizes || []).join(", ");
+      document.getElementById("colors").value = (item.colors || []).join(", ");
+
+      document.getElementById("heading-text").innerText = `Editing: ${item.title}`;
+      document.getElementById("submit-btn").innerText = "Save Cloud Changes";
+      document.getElementById("cancel-edit-btn").classList.remove("hidden");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    };
+
+    window.cancelEditProduct = () => {
+      document.getElementById("product-form").reset();
+      document.getElementById("edit-product-id").value = "";
+      document.getElementById("heading-text").innerText = "Add New Product";
+      document.getElementById("submit-btn").innerText = "Publish to Live Catalog";
+      document.getElementById("cancel-edit-btn").classList.add("hidden");
+    };
 
     window.toggleStockOnline = async (id, currentStatus) => {
       await updateDoc(doc(db, "products", id), { inStock: !currentStatus });

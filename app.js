@@ -1,7 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getFirestore, collection, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-// Active Firebase Configuration
 const firebaseConfig = {
   apiKey: "AIzaSyC91-oOwG87W85hbpxzff4acW7KeymceMw",
   authDomain: "fashion-point-1c116.firebaseapp.com",
@@ -18,7 +17,7 @@ const db = getFirestore(app);
 const SHOP_WHATSAPP_NUMBER = "918091810807";
 let currentProducts = [];
 
-// Fallback backup catalog jab tak database me koi item na ho
+// Fallback catalog agar cloud khali ho
 const defaultProducts = [
   {
     id: "def-1",
@@ -26,8 +25,11 @@ const defaultProducts = [
     category: "Saree",
     price: 2499,
     sizes: ["Free Size"],
-    imageUrl: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=700&auto=format&fit=crop",
-    inStock: true
+    colors: ["Classic Black", "Ivory"],
+    inStock: true,
+    media: [
+      { type: "image", url: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=700&auto=format&fit=crop" }
+    ]
   },
   {
     id: "def-2",
@@ -35,8 +37,11 @@ const defaultProducts = [
     category: "Men",
     price: 3999,
     sizes: ["38", "40", "42", "44"],
-    imageUrl: "https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=700&auto=format&fit=crop",
-    inStock: true
+    colors: ["Midnight Black"],
+    inStock: true,
+    media: [
+      { type: "image", url: "https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=700&auto=format&fit=crop" }
+    ]
   },
   {
     id: "def-3",
@@ -44,8 +49,11 @@ const defaultProducts = [
     category: "Suit",
     price: 1899,
     sizes: ["M", "L", "XL"],
-    imageUrl: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=700&auto=format&fit=crop",
-    inStock: true
+    colors: ["Jet Black", "Bottle Green"],
+    inStock: true,
+    media: [
+      { type: "image", url: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=700&auto=format&fit=crop" }
+    ]
   },
   {
     id: "def-4",
@@ -53,17 +61,27 @@ const defaultProducts = [
     category: "Kids",
     price: 899,
     sizes: ["4-5 Yrs", "6-7 Yrs", "8-9 Yrs"],
-    imageUrl: "https://images.unsplash.com/photo-1622290291468-a28f7a7dc6a8?w=700&auto=format&fit=crop",
-    inStock: true
+    colors: ["Off White", "Gold"],
+    inStock: true,
+    media: [
+      { type: "image", url: "https://images.unsplash.com/photo-1622290291468-a28f7a7dc6a8?w=700&auto=format&fit=crop" }
+    ]
   }
 ];
 
-// Live Realtime Firestore Listener (Sabhi phones par bina page refresh hue update hoga)
+// Realtime Firestore Listener
 try {
   const q = query(collection(db, "products"), orderBy("createdAt", "desc"));
   onSnapshot(q, (snapshot) => {
     if (!snapshot.empty) {
-      currentProducts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      currentProducts = snapshot.docs.map(doc => {
+        const data = doc.data();
+        let mediaArr = data.media;
+        if (!mediaArr || mediaArr.length === 0) {
+          mediaArr = [{ type: "image", url: data.imageUrl || "https://placehold.co/600x800/171717/ffffff?text=Fashion+Point" }];
+        }
+        return { id: doc.id, ...data, media: mediaArr };
+      });
     } else {
       currentProducts = defaultProducts;
     }
@@ -78,7 +96,6 @@ try {
   renderProducts();
 }
 
-// Theme handling
 function initTheme() {
   const saved = localStorage.getItem("fp_theme") || "dark";
   document.documentElement.classList.toggle("dark", saved === "dark");
@@ -90,7 +107,6 @@ function toggleTheme() {
 }
 window.toggleTheme = toggleTheme;
 
-// Catalog Renderer
 function renderProducts(filter = "all") {
   const grid = document.getElementById("product-grid");
   if (!grid) return;
@@ -104,21 +120,29 @@ function renderProducts(filter = "all") {
 
   grid.innerHTML = filtered.map(item => {
     const isAvailable = item.inStock !== false;
-    const imgUrl = item.imageUrl || "https://placehold.co/600x800/171717/ffffff?text=Fashion+Point";
+    const primaryMedia = (item.media && item.media.length > 0)
+      ? item.media[0]
+      : { type: "image", url: "https://placehold.co/600x800/171717/ffffff?text=Fashion+Point" };
 
     return `
       <div class="bg-white dark:bg-brand-cardDark rounded-2xl overflow-hidden border border-neutral-200 dark:border-brand-borderDark flex flex-col justify-between shadow-sm hover:shadow-xl transition-all duration-300 ${!isAvailable ? 'opacity-70' : ''}">
         <div>
-          <div class="relative w-full h-80 bg-neutral-100 dark:bg-neutral-900 overflow-hidden group cursor-pointer" onclick="openMediaPreview('${imgUrl}')">
-            <img src="${imgUrl}" alt="${item.title}" loading="lazy" class="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500" />
+          <div class="relative w-full h-80 bg-neutral-100 dark:bg-neutral-900 overflow-hidden group cursor-pointer" onclick="openMediaPreview('${item.id}')">
+            ${primaryMedia.type === "video"
+              ? `<video src="${primaryMedia.url}" autoplay muted loop playsinline class="w-full h-full object-cover"></video>`
+              : `<img src="${primaryMedia.url}" alt="${item.title}" loading="lazy" class="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500" />`
+            }
+            
             <div class="absolute top-3 left-3 flex flex-col gap-1.5">
               <span class="bg-neutral-900/90 dark:bg-white/90 text-white dark:text-neutral-900 text-[10px] font-black tracking-widest uppercase px-2.5 py-1 rounded shadow-sm">
                 ${item.category}
               </span>
               ${!isAvailable ? `<span class="bg-red-600 text-white text-[9px] font-extrabold uppercase px-2 py-0.5 rounded shadow">Sold Out</span>` : ''}
+              ${item.media.length > 1 ? `<span class="bg-black/70 text-white text-[9px] font-bold px-2 py-0.5 rounded shadow"><i class="fa-solid fa-images mr-1"></i>+${item.media.length - 1} more</span>` : ''}
             </div>
+
             <div class="absolute bottom-2 right-2 bg-black/60 backdrop-blur-sm text-white text-[10px] px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition">
-              <i class="fa-solid fa-expand mr-1"></i> Preview
+              <i class="fa-solid fa-expand mr-1"></i> Preview Gallery
             </div>
           </div>
 
@@ -166,7 +190,6 @@ function renderProducts(filter = "all") {
   }).join("");
 }
 
-// Global WhatsApp Order Trigger
 window.orderDirectWhatsApp = function(productId) {
   const item = currentProducts.find(p => p.id === productId);
   if (!item) return;
@@ -181,7 +204,6 @@ window.orderDirectWhatsApp = function(productId) {
   window.open(`https://wa.me/${SHOP_WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, "_blank");
 };
 
-// Global Filters
 window.filterItems = function(category, event) {
   document.querySelectorAll(".filter-btn").forEach(btn => {
     btn.classList.remove("bg-neutral-900", "text-white", "dark:bg-white", "dark:text-neutral-900");
@@ -194,10 +216,22 @@ window.filterItems = function(category, event) {
   renderProducts(category);
 };
 
-// Global Media Modal
-window.openMediaPreview = function(url) {
+// Multi-media gallery preview
+window.openMediaPreview = function(productId) {
+  const item = currentProducts.find(p => p.id === productId);
+  if (!item) return;
+
   const modal = document.getElementById("media-modal");
-  document.getElementById("modal-content").innerHTML = `<img src="${url}" class="max-h-[60vh] max-w-full object-contain rounded-2xl" />`;
+  const container = document.getElementById("modal-content");
+  
+  container.innerHTML = `
+    <div class="flex flex-col gap-4 w-full max-h-[70vh] overflow-y-auto no-scrollbar">
+      ${item.media.map(m => m.type === "video" 
+        ? `<video src="${m.url}" controls autoplay playsinline class="max-h-[55vh] w-auto mx-auto rounded-xl shadow-lg"></video>`
+        : `<img src="${m.url}" class="max-h-[55vh] object-contain mx-auto rounded-xl shadow-lg" />`
+      ).join("")}
+    </div>
+  `;
   modal.classList.remove("hidden");
 };
 
@@ -206,7 +240,7 @@ window.closeMediaModal = function() {
   if (modal) modal.classList.add("hidden");
 };
 
-// Admin trigger: Press 'p' 3 times
+// Admin shortcut 'p' 3 times
 let pCount = 0;
 let pTimer;
 document.addEventListener("keydown", (e) => {
