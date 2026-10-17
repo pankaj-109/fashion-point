@@ -39,8 +39,10 @@
           F<span class="text-neutral-400 -ml-0.5">P</span>
         </div>
         <div>
-          <h1 class="text-base font-black tracking-wider uppercase font-serif">Store Management</h1>
-          <p class="text-[9px] uppercase tracking-widest text-neutral-500 font-semibold">Fashion Point • Kala Amb</p>
+          <h1 class="text-base font-black tracking-wider uppercase font-serif">Cloud Store Manager</h1>
+          <p class="text-[9px] uppercase tracking-widest text-emerald-500 font-semibold flex items-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block animate-pulse"></span> Firebase Live Sync
+          </p>
         </div>
       </div>
 
@@ -54,20 +56,15 @@
 
   <main class="max-w-6xl mx-auto px-4 py-8 space-y-8">
     
-    <!-- Add / Edit Item Form -->
+    <!-- Add Item Form -->
     <div class="bg-white dark:bg-brand-cardDark p-6 rounded-3xl border border-neutral-200 dark:border-brand-borderDark shadow-sm">
       <div class="flex items-center justify-between mb-4 pb-2 border-b border-neutral-200 dark:border-neutral-800">
         <h2 id="form-heading" class="text-base font-black uppercase tracking-wider flex items-center gap-2">
-          <i class="fa-solid fa-shirt"></i> Add New Product
+          <i class="fa-solid fa-cloud-arrow-up text-emerald-500"></i> Add Product (Syncs to All Phones)
         </h2>
-        <button id="cancel-edit-btn" onclick="cancelEdit()" class="hidden text-xs text-rose-500 hover:underline font-bold">
-          Cancel Editing
-        </button>
       </div>
 
-      <form id="product-form" onsubmit="handleProductForm(event)" class="space-y-4">
-        <input type="hidden" id="edit-product-id" value="" />
-
+      <form id="product-form" class="space-y-4">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label class="text-[10px] font-black uppercase tracking-wider block mb-1">Product Title</label>
@@ -85,7 +82,7 @@
           </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label class="text-[10px] font-black uppercase tracking-wider block mb-1">Price (₹)</label>
             <input type="number" id="price" required placeholder="e.g. 2499" class="w-full text-xs p-3 rounded-xl border border-neutral-300 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-900 text-neutral-900 dark:text-white outline-none" />
@@ -93,23 +90,18 @@
 
           <div>
             <label class="text-[10px] font-black uppercase tracking-wider block mb-1">Sizes (Comma separated)</label>
-            <input type="text" id="sizes" required placeholder="e.g. Free Size OR 38, 40, 42" class="w-full text-xs p-3 rounded-xl border border-neutral-300 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-900 text-neutral-900 dark:text-white outline-none" />
-          </div>
-
-          <div>
-            <label class="text-[10px] font-black uppercase tracking-wider block mb-1">Colors (Comma separated)</label>
-            <input type="text" id="colors" placeholder="e.g. Black, Gold, Off-White" class="w-full text-xs p-3 rounded-xl border border-neutral-300 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-900 text-neutral-900 dark:text-white outline-none" />
+            <input type="text" id="sizes" required placeholder="e.g. Free Size OR M, L, XL" class="w-full text-xs p-3 rounded-xl border border-neutral-300 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-900 text-neutral-900 dark:text-white outline-none" />
           </div>
         </div>
 
         <div>
-          <label class="text-[10px] font-black uppercase tracking-wider block mb-1">Upload Product Photos / Videos</label>
-          <input type="file" id="media-files" accept="image/*,video/*" multiple class="w-full text-xs p-2 rounded-xl border border-neutral-300 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-900 text-neutral-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-neutral-200 dark:file:bg-neutral-800 dark:file:text-white" />
-          <p class="text-[10px] text-neutral-400 mt-1">Leave empty to keep existing images when editing.</p>
+          <label class="text-[10px] font-black uppercase tracking-wider block mb-1">Product Photo</label>
+          <input type="file" id="media-file" accept="image/*" class="w-full text-xs p-2 rounded-xl border border-neutral-300 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-900 text-neutral-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-neutral-200 dark:file:bg-neutral-800 dark:file:text-white" />
+          <p class="text-[10px] text-neutral-400 mt-1">Photo will be auto-optimized for instant mobile loading.</p>
         </div>
 
-        <button type="submit" id="submit-btn" class="w-full bg-neutral-900 hover:bg-black dark:bg-white dark:hover:bg-neutral-200 text-white dark:text-neutral-900 font-black uppercase tracking-wider py-3.5 rounded-xl btn-bounce shadow-md">
-          Publish Item
+        <button type="submit" id="submit-btn" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase tracking-wider py-3.5 rounded-xl btn-bounce shadow-md">
+          Publish to Live Catalog
         </button>
       </form>
     </div>
@@ -118,106 +110,106 @@
     <div class="bg-white dark:bg-brand-cardDark p-6 rounded-3xl border border-neutral-200 dark:border-brand-borderDark shadow-sm">
       <div class="flex items-center justify-between mb-4 pb-2 border-b border-neutral-200 dark:border-neutral-800">
         <h2 class="text-base font-black uppercase tracking-wider flex items-center gap-2">
-          <i class="fa-solid fa-boxes-stacked"></i> Current Catalog Inventory
+          <i class="fa-solid fa-boxes-stacked"></i> Live Cloud Inventory
         </h2>
-        <span class="text-[11px] text-neutral-400">Toggle stock or modify items</span>
+        <span class="text-[11px] text-neutral-400">Updates sync in real-time</span>
       </div>
 
-      <div id="admin-inventory-list" class="space-y-3"></div>
+      <div id="admin-inventory-list" class="space-y-3">
+        <p class="text-xs text-neutral-500 py-6 text-center">Loading cloud inventory...</p>
+      </div>
     </div>
   </main>
 
-  <script src="app.js?v=3.0"></script>
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      initTheme();
-      renderAdminInventory();
-    });
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    async function handleProductForm(e) {
+    const firebaseConfig = {
+      apiKey: "AIzaSyC91-oOwG87W85hbpxzff4acW7KeymceMw",
+      authDomain: "fashion-point-1c116.firebaseapp.com",
+      projectId: "fashion-point-1c116",
+      storageBucket: "fashion-point-1c116.firebasestorage.app",
+      messagingSenderId: "755423609380",
+      appId: "1:755423609380:web:9f428563412534b8618eb1",
+      measurementId: "G-40C2REG60D"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    let adminProducts = [];
+
+    // Realtime Cloud Listener
+    try {
+      const q = query(collection(db, "products"), orderBy("createdAt", "desc"));
+      onSnapshot(q, (snapshot) => {
+        adminProducts = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderAdminInventory();
+      });
+    } catch(e) {
+      console.error(e);
+    }
+
+    // Submit Handler
+    document.getElementById("product-form").addEventListener("submit", async (e) => {
       e.preventDefault();
       const submitBtn = document.getElementById("submit-btn");
-      submitBtn.innerText = "Saving to catalog...";
+      submitBtn.innerText = "Publishing to Cloud...";
       submitBtn.disabled = true;
 
       try {
-        const editId = document.getElementById("edit-product-id").value;
         const title = document.getElementById("title").value.trim();
         const category = document.getElementById("category").value;
         const price = Number(document.getElementById("price").value);
         const sizes = document.getElementById("sizes").value.split(",").map(s => s.trim());
-        const colors = document.getElementById("colors").value.trim() ? document.getElementById("colors").value.split(",").map(c => c.trim()) : [];
-        const mediaFilesInput = document.getElementById("media-files");
+        const fileInput = document.getElementById("media-file");
 
-        let uploadedMedia = [];
-        if (mediaFilesInput.files && mediaFilesInput.files.length > 0) {
-          for (let i = 0; i < mediaFilesInput.files.length; i++) {
-            const file = mediaFilesInput.files[i];
-            const isVideo = file.type.startsWith("video/");
-            const base64Data = await convertBase64(file);
-            uploadedMedia.push({
-              type: isVideo ? "video" : "image",
-              url: base64Data
-            });
-          }
+        let imageUrl = "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=700";
+        if (fileInput.files.length > 0) {
+          imageUrl = await resizeAndConvertImage(fileInput.files[0]);
         }
 
-        let products = getProducts();
+        await addDoc(collection(db, "products"), {
+          title,
+          category,
+          price,
+          sizes,
+          imageUrl,
+          inStock: true,
+          createdAt: serverTimestamp()
+        });
 
-        if (editId) {
-          const index = products.findIndex(p => p.id === Number(editId));
-          if (index !== -1) {
-            products[index].title = title;
-            products[index].category = category;
-            products[index].price = price;
-            products[index].sizes = sizes;
-            products[index].colors = colors;
-            if (uploadedMedia.length > 0) {
-              products[index].media = uploadedMedia;
-            }
-          }
-          alert("Product updated successfully!");
-          cancelEdit();
-        } else {
-          if (uploadedMedia.length === 0) {
-            uploadedMedia.push({
-              type: "image",
-              url: "https://placehold.co/600x800/171717/ffffff?text=Fashion+Point"
-            });
-          }
-
-          const newProduct = {
-            id: Date.now(),
-            title,
-            category,
-            price,
-            sizes,
-            colors,
-            inStock: true,
-            media: uploadedMedia
-          };
-
-          products.unshift(newProduct);
-          alert("New product published!");
-          document.getElementById("product-form").reset();
-        }
-
-        saveProducts(products);
-        renderAdminInventory();
+        alert("Item Published! Har phone par bina page refresh kiye ye item live ho gaya hai.");
+        document.getElementById("product-form").reset();
       } catch (err) {
         console.error(err);
-        alert("Upload error. Please use compressed photos.");
+        alert("Upload error: " + err.message);
       } finally {
-        submitBtn.innerText = editId ? "Save Changes" : "Publish Item";
+        submitBtn.innerText = "Publish to Live Catalog";
         submitBtn.disabled = false;
       }
-    }
+    });
 
-    function convertBase64(file) {
+    // Image Compressor to keep it ultra lightweight
+    function resizeAndConvertImage(file) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result);
+        reader.onload = (event) => {
+          const img = new Image();
+          img.src = event.target.result;
+          img.onload = () => {
+            const canvas = document.createElement("canvas");
+            const MAX_WIDTH = 800;
+            const scaleSize = MAX_WIDTH / img.width;
+            canvas.width = (img.width > MAX_WIDTH) ? MAX_WIDTH : img.width;
+            canvas.height = (img.width > MAX_WIDTH) ? (img.height * scaleSize) : img.height;
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            resolve(canvas.toDataURL("image/jpeg", 0.75));
+          };
+        };
         reader.onerror = error => reject(error);
       });
     }
@@ -226,22 +218,17 @@
       const container = document.getElementById("admin-inventory-list");
       if (!container) return;
 
-      const products = getProducts();
-      if (products.length === 0) {
-        container.innerHTML = `<p class="text-xs text-neutral-500 py-6 text-center">No products found in inventory.</p>`;
+      if (adminProducts.length === 0) {
+        container.innerHTML = `<p class="text-xs text-neutral-500 py-6 text-center">No products yet in cloud. Add your first item above!</p>`;
         return;
       }
 
-      container.innerHTML = products.map(item => {
+      container.innerHTML = adminProducts.map(item => {
         const isAvailable = item.inStock !== false;
-        const thumb = (item.media && item.media[0])
-          ? (item.media[0].type === "video" ? "https://placehold.co/100x100/000/fff?text=VIDEO" : item.media[0].url)
-          : "https://placehold.co/100x100";
-
         return `
           <div class="bg-neutral-50 dark:bg-neutral-900 p-4 rounded-2xl border border-neutral-200 dark:border-neutral-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div class="flex items-center gap-3">
-              <img src="${thumb}" class="w-14 h-14 object-cover rounded-xl border border-neutral-300 dark:border-neutral-700"/>
+              <img src="${item.imageUrl}" class="w-14 h-14 object-cover rounded-xl border border-neutral-300 dark:border-neutral-700"/>
               <div>
                 <div class="flex items-center gap-2">
                   <h4 class="font-bold text-sm text-neutral-900 dark:text-white">${item.title}</h4>
@@ -249,18 +236,15 @@
                     ${isAvailable ? 'In Stock' : 'Sold Out'}
                   </span>
                 </div>
-                <p class="text-xs text-neutral-500 mt-0.5">₹${item.price} • ${item.category} • Sizes: [${item.sizes.join(", ")}]</p>
+                <p class="text-xs text-neutral-500 mt-0.5">₹${item.price} • ${item.category} • Sizes: [${(item.sizes || []).join(", ")}]</p>
               </div>
             </div>
 
             <div class="flex items-center gap-2 self-end md:self-center">
-              <button onclick="toggleStock(${item.id})" class="px-3 py-1.5 rounded-lg border border-neutral-300 dark:border-neutral-700 text-xs font-semibold ${isAvailable ? 'hover:bg-amber-500 hover:text-white' : 'hover:bg-emerald-600 hover:text-white'} transition">
+              <button onclick="window.toggleStockOnline('${item.id}', ${isAvailable})" class="px-3 py-1.5 rounded-lg border border-neutral-300 dark:border-neutral-700 text-xs font-semibold ${isAvailable ? 'hover:bg-amber-500 hover:text-white' : 'hover:bg-emerald-600 hover:text-white'} transition">
                 ${isAvailable ? 'Mark Sold Out' : 'Mark In Stock'}
               </button>
-              <button onclick="startEditProduct(${item.id})" class="px-3 py-1.5 rounded-lg bg-neutral-200 dark:bg-neutral-800 text-neutral-900 dark:text-white text-xs font-bold hover:bg-neutral-300 dark:hover:bg-neutral-700 transition">
-                <i class="fa-solid fa-pen-to-square mr-1"></i> Edit
-              </button>
-              <button onclick="deleteProduct(${item.id})" class="text-rose-500 hover:text-rose-700 text-xs font-bold p-2">
+              <button onclick="window.deleteProductOnline('${item.id}')" class="text-rose-500 hover:text-rose-700 text-xs font-bold p-2">
                 <i class="fa-solid fa-trash"></i>
               </button>
             </div>
@@ -269,50 +253,15 @@
       }).join("");
     }
 
-    function toggleStock(id) {
-      let products = getProducts();
-      const index = products.findIndex(p => p.id === id);
-      if (index !== -1) {
-        products[index].inStock = !products[index].inStock;
-        saveProducts(products);
-        renderAdminInventory();
+    window.toggleStockOnline = async (id, currentStatus) => {
+      await updateDoc(doc(db, "products", id), { inStock: !currentStatus });
+    };
+
+    window.deleteProductOnline = async (id) => {
+      if (confirm("Are you sure you want to delete this product?")) {
+        await deleteDoc(doc(db, "products", id));
       }
-    }
-
-    function startEditProduct(id) {
-      const products = getProducts();
-      const item = products.find(p => p.id === id);
-      if (!item) return;
-
-      document.getElementById("edit-product-id").value = item.id;
-      document.getElementById("title").value = item.title;
-      document.getElementById("category").value = item.category;
-      document.getElementById("price").value = item.price;
-      document.getElementById("sizes").value = item.sizes.join(", ");
-      document.getElementById("colors").value = item.colors ? item.colors.join(", ") : "";
-      
-      document.getElementById("form-heading").innerHTML = `<i class="fa-solid fa-pen-to-square"></i> Editing: ${item.title}`;
-      document.getElementById("submit-btn").innerText = "Save Changes";
-      document.getElementById("cancel-edit-btn").classList.remove("hidden");
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-
-    function cancelEdit() {
-      document.getElementById("product-form").reset();
-      document.getElementById("edit-product-id").value = "";
-      document.getElementById("form-heading").innerHTML = `<i class="fa-solid fa-shirt"></i> Add New Product`;
-      document.getElementById("submit-btn").innerText = "Publish Item";
-      document.getElementById("cancel-edit-btn").classList.add("hidden");
-    }
-
-    function deleteProduct(id) {
-      if (confirm("Are you sure you want to remove this item?")) {
-        let products = getProducts();
-        products = products.filter(p => p.id !== id);
-        saveProducts(products);
-        renderAdminInventory();
-      }
-    }
+    };
   </script>
 </body>
 </html>

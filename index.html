@@ -166,18 +166,17 @@
     </div>
   </footer>
 
-  <script src="app.js?v=3.0"></script>
+  <!-- Realtime Modular Script -->
+  <script type="module" src="app.js?v=5.0"></script>
   <script>
     document.addEventListener("DOMContentLoaded", () => {
-      initTheme();
-      renderProducts();
       setTimeout(() => {
         const splash = document.getElementById("splash-screen");
         if (splash) {
           splash.style.opacity = "0";
           setTimeout(() => splash.style.display = "none", 400);
         }
-      }, 600);
+      }, 500);
     });
   </script>
 </body>

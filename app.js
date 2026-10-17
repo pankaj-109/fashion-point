@@ -1,114 +1,101 @@
-// Target Shop Details
-const SHOP_WHATSAPP_NUMBER = "918091810807";
-// Versioning key to instantly flush and replace old browser caches
-const STORAGE_KEY = "fashion_point_inventory_v6"; 
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getFirestore, collection, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-// Global Master Inventory List
-// Agar koi bhi naya kapda permanent dikhana ho toh use is list me add kijiye:
+// Active Firebase Configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyC91-oOwG87W85hbpxzff4acW7KeymceMw",
+  authDomain: "fashion-point-1c116.firebaseapp.com",
+  projectId: "fashion-point-1c116",
+  storageBucket: "fashion-point-1c116.firebasestorage.app",
+  messagingSenderId: "755423609380",
+  appId: "1:755423609380:web:9f428563412534b8618eb1",
+  measurementId: "G-40C2REG60D"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const SHOP_WHATSAPP_NUMBER = "918091810807";
+let currentProducts = [];
+
+// Fallback backup catalog jab tak database me koi item na ho
 const defaultProducts = [
   {
-    id: 1,
+    id: "def-1",
     title: "Handcrafted Banarasi Raw Silk Saree",
     category: "Saree",
     price: 2499,
     sizes: ["Free Size"],
-    colors: ["Classic Black", "Ivory"],
-    inStock: true,
-    media: [
-      { type: "image", url: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=700&auto=format&fit=crop" }
-    ]
+    imageUrl: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=700&auto=format&fit=crop",
+    inStock: true
   },
   {
-    id: 2,
+    id: "def-2",
     title: "Embroidered Velvet Tuxedo Blazer",
     category: "Men",
     price: 3999,
     sizes: ["38", "40", "42", "44"],
-    colors: ["Midnight Black"],
-    inStock: true,
-    media: [
-      { type: "image", url: "https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=700&auto=format&fit=crop" }
-    ]
+    imageUrl: "https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=700&auto=format&fit=crop",
+    inStock: true
   },
   {
-    id: 3,
+    id: "def-3",
     title: "Partywear Anarkali Chiffon Suit with Dupatta",
     category: "Suit",
     price: 1899,
     sizes: ["M", "L", "XL"],
-    colors: ["Jet Black", "Bottle Green"],
-    inStock: true,
-    media: [
-      { type: "image", url: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=700&auto=format&fit=crop" }
-    ]
+    imageUrl: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=700&auto=format&fit=crop",
+    inStock: true
   },
   {
-    id: 4,
+    id: "def-4",
     title: "Kids Traditional Kurta Pajama Festive Set",
     category: "Kids",
     price: 899,
     sizes: ["4-5 Yrs", "6-7 Yrs", "8-9 Yrs"],
-    colors: ["Off White", "Gold"],
-    inStock: true,
-    media: [
-      { type: "image", url: "https://images.unsplash.com/photo-1622290291468-a28f7a7dc6a8?w=700&auto=format&fit=crop" }
-    ]
-  },
-  {
-    id: 5,
-    title: "Designer Chanderi Floral Kurti Set",
-    category: "Suit",
-    price: 1499,
-    sizes: ["S", "M", "L", "XL"],
-    colors: ["Royal Blue", "Peach"],
-    inStock: true,
-    media: [
-      { type: "image", url: "https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?w=700&auto=format&fit=crop" }
-    ]
+    imageUrl: "https://images.unsplash.com/photo-1622290291468-a28f7a7dc6a8?w=700&auto=format&fit=crop",
+    inStock: true
   }
 ];
 
-// Theme Switcher Logic
+// Live Realtime Firestore Listener (Sabhi phones par bina page refresh hue update hoga)
+try {
+  const q = query(collection(db, "products"), orderBy("createdAt", "desc"));
+  onSnapshot(q, (snapshot) => {
+    if (!snapshot.empty) {
+      currentProducts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    } else {
+      currentProducts = defaultProducts;
+    }
+    renderProducts();
+  }, (err) => {
+    console.warn("Firestore listener fallback to defaults:", err);
+    currentProducts = defaultProducts;
+    renderProducts();
+  });
+} catch (e) {
+  currentProducts = defaultProducts;
+  renderProducts();
+}
+
+// Theme handling
 function initTheme() {
-  const savedTheme = localStorage.getItem("fp_theme") || "dark";
-  if (savedTheme === "dark") {
-    document.documentElement.classList.add("dark");
-  } else {
-    document.documentElement.classList.remove("dark");
-  }
+  const saved = localStorage.getItem("fp_theme") || "dark";
+  document.documentElement.classList.toggle("dark", saved === "dark");
 }
 
 function toggleTheme() {
   const isDark = document.documentElement.classList.toggle("dark");
   localStorage.setItem("fp_theme", isDark ? "dark" : "light");
 }
+window.toggleTheme = toggleTheme;
 
-// Data Storage Sync
-function getProducts() {
-  const stored = localStorage.getItem(STORAGE_KEY);
-  if (!stored) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultProducts));
-    return defaultProducts;
-  }
-  try {
-    const parsed = JSON.parse(stored);
-    return (Array.isArray(parsed) && parsed.length > 0) ? parsed : defaultProducts;
-  } catch (e) {
-    return defaultProducts;
-  }
-}
-
-function saveProducts(products) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
-}
-
-// Render Catalog Grid
+// Catalog Renderer
 function renderProducts(filter = "all") {
   const grid = document.getElementById("product-grid");
   if (!grid) return;
 
-  const products = getProducts();
-  const filtered = filter === "all" ? products : products.filter(p => p.category === filter);
+  const filtered = filter === "all" ? currentProducts : currentProducts.filter(p => p.category === filter);
 
   if (filtered.length === 0) {
     grid.innerHTML = `<div class="col-span-full text-center py-20 text-neutral-400 font-medium">No items found in this category.</div>`;
@@ -117,50 +104,38 @@ function renderProducts(filter = "all") {
 
   grid.innerHTML = filtered.map(item => {
     const isAvailable = item.inStock !== false;
-    const primaryMedia = (item.media && item.media.length > 0)
-      ? item.media[0]
-      : { type: "image", url: "https://placehold.co/600x800/171717/ffffff?text=Fashion+Point" };
+    const imgUrl = item.imageUrl || "https://placehold.co/600x800/171717/ffffff?text=Fashion+Point";
 
     return `
       <div class="bg-white dark:bg-brand-cardDark rounded-2xl overflow-hidden border border-neutral-200 dark:border-brand-borderDark flex flex-col justify-between shadow-sm hover:shadow-xl transition-all duration-300 ${!isAvailable ? 'opacity-70' : ''}">
         <div>
-          <!-- Product Media Banner -->
-          <div class="relative w-full h-80 bg-neutral-100 dark:bg-neutral-900 overflow-hidden group cursor-pointer" onclick="openMediaPreview('${primaryMedia.url}', '${primaryMedia.type}')">
-            ${primaryMedia.type === "video"
-              ? `<video src="${primaryMedia.url}" autoplay muted loop playsinline class="w-full h-full object-cover"></video>`
-              : `<img src="${primaryMedia.url}" alt="${item.title}" loading="lazy" class="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500" />`
-            }
-            
+          <div class="relative w-full h-80 bg-neutral-100 dark:bg-neutral-900 overflow-hidden group cursor-pointer" onclick="openMediaPreview('${imgUrl}')">
+            <img src="${imgUrl}" alt="${item.title}" loading="lazy" class="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500" />
             <div class="absolute top-3 left-3 flex flex-col gap-1.5">
               <span class="bg-neutral-900/90 dark:bg-white/90 text-white dark:text-neutral-900 text-[10px] font-black tracking-widest uppercase px-2.5 py-1 rounded shadow-sm">
                 ${item.category}
               </span>
               ${!isAvailable ? `<span class="bg-red-600 text-white text-[9px] font-extrabold uppercase px-2 py-0.5 rounded shadow">Sold Out</span>` : ''}
             </div>
-
             <div class="absolute bottom-2 right-2 bg-black/60 backdrop-blur-sm text-white text-[10px] px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition">
               <i class="fa-solid fa-expand mr-1"></i> Preview
             </div>
           </div>
 
-          <!-- Product Details -->
           <div class="p-4">
             <h3 class="font-bold text-neutral-900 dark:text-white text-base tracking-tight line-clamp-1">${item.title}</h3>
-            
             <div class="flex items-baseline gap-2 mt-1">
               <span class="text-neutral-900 dark:text-white font-black text-2xl">₹${item.price}</span>
               <span class="text-[10px] text-emerald-500 font-bold uppercase tracking-wider">In Stock & Verified</span>
             </div>
 
-            <!-- Size & Quantity Controls Directly on Card -->
             <div class="grid grid-cols-2 gap-2 mt-4">
               <div>
                 <label class="text-[10px] font-bold uppercase tracking-wider text-neutral-500 block mb-1">Select Size</label>
                 <select id="size-${item.id}" ${!isAvailable ? 'disabled' : ''} class="w-full text-xs font-semibold border border-neutral-300 dark:border-neutral-700 rounded-lg p-2 bg-neutral-50 dark:bg-neutral-900 text-neutral-900 dark:text-white outline-none">
-                  ${item.sizes.map(s => `<option value="${s}">${s}</option>`).join("")}
+                  ${(item.sizes || ["Free Size"]).map(s => `<option value="${s}">${s}</option>`).join("")}
                 </select>
               </div>
-
               <div>
                 <label class="text-[10px] font-bold uppercase tracking-wider text-neutral-500 block mb-1">Quantity</label>
                 <select id="qty-${item.id}" ${!isAvailable ? 'disabled' : ''} class="w-full text-xs font-semibold border border-neutral-300 dark:border-neutral-700 rounded-lg p-2 bg-neutral-50 dark:bg-neutral-900 text-neutral-900 dark:text-white outline-none">
@@ -175,15 +150,14 @@ function renderProducts(filter = "all") {
           </div>
         </div>
 
-        <!-- 1-Click WhatsApp Order Button -->
         <div class="p-4 pt-0">
           ${isAvailable ? `
-            <button onclick="orderDirectWhatsApp(${item.id})" class="w-full bg-[#25D366] hover:bg-[#20ba59] text-white text-xs font-black uppercase tracking-wider py-3 px-4 rounded-xl flex items-center justify-center gap-2 btn-bounce shadow-md">
+            <button onclick="orderDirectWhatsApp('${item.id}')" class="w-full bg-[#25D366] hover:bg-[#20ba59] text-white text-xs font-black uppercase tracking-wider py-3 px-4 rounded-xl flex items-center justify-center gap-2 btn-bounce shadow-md">
               <i class="fa-brands fa-whatsapp text-base"></i> Order via WhatsApp
             </button>
           ` : `
             <button disabled class="w-full bg-neutral-300 dark:bg-neutral-800 text-neutral-500 text-xs font-bold uppercase py-3 rounded-xl cursor-not-allowed">
-              Currently Out of Stock
+              Sold Out
             </button>
           `}
         </div>
@@ -192,89 +166,61 @@ function renderProducts(filter = "all") {
   }).join("");
 }
 
-// Format and Trigger WhatsApp Message
-function orderDirectWhatsApp(productId) {
-  const products = getProducts();
-  const item = products.find(p => p.id === productId);
+// Global WhatsApp Order Trigger
+window.orderDirectWhatsApp = function(productId) {
+  const item = currentProducts.find(p => p.id === productId);
   if (!item) return;
 
-  const selectedSize = document.getElementById(`size-${item.id}`).value;
-  const selectedQty = document.getElementById(`qty-${item.id}`).value;
-  const totalPrice = item.price * Number(selectedQty);
+  const sizeEl = document.getElementById(`size-${item.id}`);
+  const qtyEl = document.getElementById(`qty-${item.id}`);
+  const size = sizeEl ? sizeEl.value : "Free Size";
+  const qty = qtyEl ? qtyEl.value : "1";
+  const total = item.price * Number(qty);
 
-  const message = 
-`*NEW ORDER ENQUIRY - FASHION POINT*
+  const msg = `*NEW ORDER - FASHION POINT*\n\nHello Fashion Point, I want to purchase this item:\n*Item:* ${item.title}\n*Category:* ${item.category}\n*Size Selected:* ${size}\n*Quantity:* ${qty}\n*Total Amount:* ₹${total}\n\nPlease confirm availability and share payment/delivery details!`;
+  window.open(`https://wa.me/${SHOP_WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, "_blank");
+};
 
-Hello Fashion Point, I want to purchase this item:
-*Item:* ${item.title}
-*Category:* ${item.category}
-*Size Selected:* ${selectedSize}
-*Quantity:* ${selectedQty}
-*Total Amount:* ₹${totalPrice}
-
-Please confirm availability and share payment/delivery details!`;
-
-  const waUrl = `https://wa.me/${SHOP_WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
-  window.open(waUrl, "_blank");
-}
-
-// Media Preview Controls
-function openMediaPreview(url, type) {
-  const modal = document.getElementById("media-modal");
-  const modalContent = document.getElementById("modal-content");
-  
-  if (type === "video") {
-    modalContent.innerHTML = `<video src="${url}" controls autoplay playsinline class="max-h-[60vh] max-w-full rounded-2xl"></video>`;
-  } else {
-    modalContent.innerHTML = `<img src="${url}" class="max-h-[60vh] max-w-full object-contain rounded-2xl" />`;
-  }
-  modal.classList.remove("hidden");
-}
-
-function closeMediaModal() {
-  const modal = document.getElementById("media-modal");
-  if (modal) {
-    modal.classList.add("hidden");
-    document.getElementById("modal-content").innerHTML = "";
-  }
-}
-
-// Filter Tabs
-function filterItems(category, event) {
-  const buttons = document.querySelectorAll(".filter-btn");
-  buttons.forEach(btn => {
+// Global Filters
+window.filterItems = function(category, event) {
+  document.querySelectorAll(".filter-btn").forEach(btn => {
     btn.classList.remove("bg-neutral-900", "text-white", "dark:bg-white", "dark:text-neutral-900");
     btn.classList.add("bg-neutral-200/80", "dark:bg-neutral-800", "text-neutral-700", "dark:text-neutral-300");
   });
-
   if (event) {
     event.currentTarget.classList.remove("bg-neutral-200/80", "dark:bg-neutral-800", "text-neutral-700", "dark:text-neutral-300");
     event.currentTarget.classList.add("bg-neutral-900", "text-white", "dark:bg-white", "dark:text-neutral-900");
   }
-
   renderProducts(category);
-}
+};
 
-// ----------------------------------------------------
-// SECRET TRIGGER: Press 'p' 3 times to open Admin Panel
-// ----------------------------------------------------
-let pKeyPressCount = 0;
-let pKeyTimer;
+// Global Media Modal
+window.openMediaPreview = function(url) {
+  const modal = document.getElementById("media-modal");
+  document.getElementById("modal-content").innerHTML = `<img src="${url}" class="max-h-[60vh] max-w-full object-contain rounded-2xl" />`;
+  modal.classList.remove("hidden");
+};
 
+window.closeMediaModal = function() {
+  const modal = document.getElementById("media-modal");
+  if (modal) modal.classList.add("hidden");
+};
+
+// Admin trigger: Press 'p' 3 times
+let pCount = 0;
+let pTimer;
 document.addEventListener("keydown", (e) => {
   if (["INPUT", "TEXTAREA", "SELECT"].includes(document.activeElement.tagName)) return;
-
   if (e.key.toLowerCase() === "p") {
-    pKeyPressCount++;
-    clearTimeout(pKeyTimer);
-
-    if (pKeyPressCount >= 3) {
-      pKeyPressCount = 0;
+    pCount++;
+    clearTimeout(pTimer);
+    if (pCount >= 3) {
+      pCount = 0;
       window.location.href = "admin.html";
     }
-
-    pKeyTimer = setTimeout(() => {
-      pKeyPressCount = 0;
-    }, 1200);
+    pTimer = setTimeout(() => { pCount = 0; }, 1200);
   }
 });
+
+initTheme();
+renderProducts();
