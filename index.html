@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Fashion Point - Luxury Studio | Kala Amb</title>
   
-  <!-- Tailwind CSS via CDN -->
+  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -49,7 +49,7 @@
     </div>
   </div>
 
-  <!-- Navbar -->
+  <!-- Header / Navbar -->
   <header class="sticky top-0 z-40 bg-white/90 dark:bg-[#121212]/90 backdrop-blur-md border-b border-neutral-200 dark:border-neutral-800">
     <div class="max-w-7xl mx-auto px-4 py-3.5 flex items-center justify-between">
       <div class="flex items-center gap-3 cursor-pointer" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
@@ -63,23 +63,23 @@
       </div>
 
       <div class="flex items-center gap-3">
-        <!-- Direct Shop Helpline -->
-        <a href="https://wa.me/918091810807?text=Hello%20Fashion%20Point%2C%20I%20have%20an%20inquiry%20regarding%20your%20products." target="_blank" class="hidden sm:flex items-center gap-1.5 text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-3 py-1.5 rounded-full border border-emerald-200 dark:border-emerald-800/50">
-          <i class="fa-brands fa-whatsapp text-sm"></i> WhatsApp Support
+        <!-- Direct Help WhatsApp Link -->
+        <a href="https://wa.me/918091810807?text=Hello%20Fashion%20Point%2C%20I%20want%20to%20inquire%20about%20your%20products." target="_blank" class="hidden sm:flex items-center gap-1.5 text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-3 py-1.5 rounded-full border border-emerald-200 dark:border-emerald-800/50">
+          <i class="fa-brands fa-whatsapp text-sm"></i> Direct Support
         </a>
 
-        <!-- Theme Switcher -->
-        <button onclick="toggleTheme()" class="p-2.5 rounded-full border border-neutral-300 dark:border-neutral-700 btn-bounce" title="Toggle Light/Dark Mode">
+        <!-- Theme Toggle Button -->
+        <button onclick="toggleTheme()" class="p-2.5 rounded-full border border-neutral-300 dark:border-neutral-700 btn-bounce" title="Toggle Theme">
           <i class="fa-solid fa-moon dark:hidden text-sm"></i>
           <i class="fa-solid fa-sun hidden dark:block text-sm text-yellow-400"></i>
         </button>
       </div>
     </div>
 
-    <!-- Category Filter Bar -->
+    <!-- Category Filters -->
     <div class="border-t border-neutral-200 dark:border-neutral-800 px-4 py-2.5 overflow-x-auto no-scrollbar">
       <div class="max-w-7xl mx-auto flex gap-2">
-        <button onclick="filterItems('all', event)" class="filter-btn active px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 btn-bounce">All Collections</button>
+        <button onclick="filterItems('all', event)" class="filter-btn active px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 btn-bounce">All</button>
         <button onclick="filterItems('Saree', event)" class="filter-btn px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-neutral-200/80 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 btn-bounce">Sarees</button>
         <button onclick="filterItems('Suit', event)" class="filter-btn px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-neutral-200/80 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 btn-bounce">Suits & Kurtis</button>
         <button onclick="filterItems('Men', event)" class="filter-btn px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-neutral-200/80 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 btn-bounce">Men & Blazers</button>
@@ -116,7 +116,7 @@
           <h3 class="text-base font-black uppercase tracking-widest font-serif">Fashion Point</h3>
         </div>
         <p class="text-xs text-neutral-500 leading-relaxed max-w-xs mx-auto md:mx-0">
-          Exclusive ethnic wear, designer sarees, wedding blazers, suits, and children's festive collections.
+          Exclusive ethnic couture, designer suits, sarees, and wedding blazers for Men, Women & Kids.
         </p>
       </div>
 
@@ -157,7 +157,7 @@
         <p class="text-xs text-neutral-500">
           WhatsApp / Calling: <span class="font-bold text-neutral-800 dark:text-neutral-200">+91 8091810807</span>
         </p>
-        <p class="text-[11px] text-neutral-400">Select your size & quantity above to place an order directly on WhatsApp with instant delivery confirmation.</p>
+        <p class="text-[11px] text-neutral-400">Order online for fast dispatch or visit our store in Kala Amb.</p>
       </div>
     </div>
 
@@ -166,7 +166,7 @@
     </div>
   </footer>
 
-  <script src="app.js"></script>
+  <script src="app.js?v=3.0"></script>
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       initTheme();
@@ -177,7 +177,7 @@
           splash.style.opacity = "0";
           setTimeout(() => splash.style.display = "none", 400);
         }
-      }, 800);
+      }, 600);
     });
   </script>
 </body>

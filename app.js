@@ -1,7 +1,10 @@
-// Shop WhatsApp Number
+// Target Shop Details
 const SHOP_WHATSAPP_NUMBER = "918091810807";
+// Versioning key to instantly flush and replace old browser caches
+const STORAGE_KEY = "fashion_point_inventory_v6"; 
 
-// Default Starter Inventory
+// Global Master Inventory List
+// Agar koi bhi naya kapda permanent dikhana ho toh use is list me add kijiye:
 const defaultProducts = [
   {
     id: 1,
@@ -50,10 +53,22 @@ const defaultProducts = [
     media: [
       { type: "image", url: "https://images.unsplash.com/photo-1622290291468-a28f7a7dc6a8?w=700&auto=format&fit=crop" }
     ]
+  },
+  {
+    id: 5,
+    title: "Designer Chanderi Floral Kurti Set",
+    category: "Suit",
+    price: 1499,
+    sizes: ["S", "M", "L", "XL"],
+    colors: ["Royal Blue", "Peach"],
+    inStock: true,
+    media: [
+      { type: "image", url: "https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?w=700&auto=format&fit=crop" }
+    ]
   }
 ];
 
-// Theme Management
+// Theme Switcher Logic
 function initTheme() {
   const savedTheme = localStorage.getItem("fp_theme") || "dark";
   if (savedTheme === "dark") {
@@ -68,21 +83,26 @@ function toggleTheme() {
   localStorage.setItem("fp_theme", isDark ? "dark" : "light");
 }
 
-// Local Storage Helper
+// Data Storage Sync
 function getProducts() {
-  const stored = localStorage.getItem("fashion_point_v4");
+  const stored = localStorage.getItem(STORAGE_KEY);
   if (!stored) {
-    localStorage.setItem("fashion_point_v4", JSON.stringify(defaultProducts));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultProducts));
     return defaultProducts;
   }
-  return JSON.parse(stored);
+  try {
+    const parsed = JSON.parse(stored);
+    return (Array.isArray(parsed) && parsed.length > 0) ? parsed : defaultProducts;
+  } catch (e) {
+    return defaultProducts;
+  }
 }
 
 function saveProducts(products) {
-  localStorage.setItem("fashion_point_v4", JSON.stringify(products));
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
 }
 
-// Render Products Grid
+// Render Catalog Grid
 function renderProducts(filter = "all") {
   const grid = document.getElementById("product-grid");
   if (!grid) return;
@@ -91,7 +111,7 @@ function renderProducts(filter = "all") {
   const filtered = filter === "all" ? products : products.filter(p => p.category === filter);
 
   if (filtered.length === 0) {
-    grid.innerHTML = `<div class="col-span-full text-center py-20 text-neutral-400 font-medium">No items found in this collection.</div>`;
+    grid.innerHTML = `<div class="col-span-full text-center py-20 text-neutral-400 font-medium">No items found in this category.</div>`;
     return;
   }
 
@@ -132,7 +152,7 @@ function renderProducts(filter = "all") {
               <span class="text-[10px] text-emerald-500 font-bold uppercase tracking-wider">In Stock & Verified</span>
             </div>
 
-            <!-- Size & Quantity Selectors -->
+            <!-- Size & Quantity Controls Directly on Card -->
             <div class="grid grid-cols-2 gap-2 mt-4">
               <div>
                 <label class="text-[10px] font-bold uppercase tracking-wider text-neutral-500 block mb-1">Select Size</label>
@@ -144,18 +164,18 @@ function renderProducts(filter = "all") {
               <div>
                 <label class="text-[10px] font-bold uppercase tracking-wider text-neutral-500 block mb-1">Quantity</label>
                 <select id="qty-${item.id}" ${!isAvailable ? 'disabled' : ''} class="w-full text-xs font-semibold border border-neutral-300 dark:border-neutral-700 rounded-lg p-2 bg-neutral-50 dark:bg-neutral-900 text-neutral-900 dark:text-white outline-none">
-                  <option value="1">1 piece</option>
-                  <option value="2">2 pieces</option>
-                  <option value="3">3 pieces</option>
-                  <option value="4">4 pieces</option>
-                  <option value="5">5 pieces</option>
+                  <option value="1">1 pc</option>
+                  <option value="2">2 pcs</option>
+                  <option value="3">3 pcs</option>
+                  <option value="4">4 pcs</option>
+                  <option value="5">5 pcs</option>
                 </select>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- High-Conversion Action Button -->
+        <!-- 1-Click WhatsApp Order Button -->
         <div class="p-4 pt-0">
           ${isAvailable ? `
             <button onclick="orderDirectWhatsApp(${item.id})" class="w-full bg-[#25D366] hover:bg-[#20ba59] text-white text-xs font-black uppercase tracking-wider py-3 px-4 rounded-xl flex items-center justify-center gap-2 btn-bounce shadow-md">
@@ -172,7 +192,7 @@ function renderProducts(filter = "all") {
   }).join("");
 }
 
-// Direct Order via WhatsApp
+// Format and Trigger WhatsApp Message
 function orderDirectWhatsApp(productId) {
   const products = getProducts();
   const item = products.find(p => p.id === productId);
@@ -182,7 +202,6 @@ function orderDirectWhatsApp(productId) {
   const selectedQty = document.getElementById(`qty-${item.id}`).value;
   const totalPrice = item.price * Number(selectedQty);
 
-  // Structured Order Message for the Shopkeeper
   const message = 
 `*NEW ORDER ENQUIRY - FASHION POINT*
 
@@ -199,7 +218,7 @@ Please confirm availability and share payment/delivery details!`;
   window.open(waUrl, "_blank");
 }
 
-// Media Lightbox Modal
+// Media Preview Controls
 function openMediaPreview(url, type) {
   const modal = document.getElementById("media-modal");
   const modalContent = document.getElementById("modal-content");
@@ -220,7 +239,7 @@ function closeMediaModal() {
   }
 }
 
-// Filter Categories
+// Filter Tabs
 function filterItems(category, event) {
   const buttons = document.querySelectorAll(".filter-btn");
   buttons.forEach(btn => {
